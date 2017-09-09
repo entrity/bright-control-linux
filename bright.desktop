@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Adjust Bright
+Exec=/usr/bin/env python /usr/local/bin/brightener.py
+Icon=/home/markham/Pictures/Clipart/crops/ghost-blade-128x128.jpg
+Type=Application
+Terminal=false
+StartupNotify=true
+Categories=GTK;GNOME;Utility;
