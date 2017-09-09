@@ -21,7 +21,6 @@ IMG_LIGHT_MUL = 'crops/ghost-out-2.jpg'
 IMG_LIGHT_DIV = 'crops/ghost-blade-2.jpg'
 
 images = []
-do_timer = True
 
 def getImg(basename):
 	img = ImageTk.Image.open("/home/markham/Pictures/Clipart/"+basename)
@@ -31,6 +30,7 @@ def getImg(basename):
 
 class CP(Frame):
 	def __init__(self, parent):
+		self.do_timer = True
 		self.parent = parent
 		Frame.__init__(self, parent)
 		self.initUI()
@@ -79,18 +79,16 @@ class CP(Frame):
 		entryBtn = Button(entryFrame, text="Change", command=(lambda : self.set_and_get(self.entry.get())))
 		entryBtn.pack(side=RIGHT, pady=8)
 		self.entry = Entry(entryFrame, width=4)
-		self.entry.pack(side=RIGHT, pady=8)
+		self.entry.pack(side=RIGHT, pady=8, padx=(64,8))
+		Checkbutton(entryFrame, text='Don\'t close', command=lambda : self.toggle_timer()).pack(side=LEFT, padx=(8,64))
 		self.entry_red = Label(entryFrame, width=5)
 		self.entry_red.pack(side=LEFT, pady=8)
 		Button(entryFrame, text='Reset red', command=(lambda : self.set_and_get('-x', RED)), pady=8).pack(side=LEFT)
 
 
 	def set_and_get(self, arg, mode=0):
-		if do_timer:
-			if hasattr(self, 'timer') and self.timer:
-				self.timer.cancel()
-			self.timer = Timer(7, self.close, (self,))
-			self.timer.start()
+		if self.do_timer:
+			self.start_timer()
 		if mode & RED:
 			if mode & PLUS:
 				arg = CP.get_redshift() + arg
@@ -123,7 +121,23 @@ class CP(Frame):
 			return int(m.group(1))
 
 	def close(self, evt):
+		self.stop_timer()
 		self.parent.destroy()
+
+	def stop_timer(self):
+		if hasattr(self, 'timer') and self.timer:
+			self.timer.cancel()
+			self.timer = None
+
+	def start_timer(self):
+		self.stop_timer()
+		self.timer = Timer(7, self.close, (self,))
+		self.timer.start()
+
+	def toggle_timer(self):
+		self.do_timer = not self.do_timer
+		self.stop_timer()
+		if self.do_timer: self.start_timer()
 
 
 if __name__ == '__main__':
