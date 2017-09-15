@@ -2,9 +2,9 @@ build: bright.c
 	gcc -o bright bright.c
 
 install:
-	cp -i brightener.py /usr/local/bin
+	cmp -s brightener.py /usr/local/bin/brightener.py || cp -i brightener.py /usr/local/bin
 	chown root:root bright
-	mv -i bright /usr/local/bin/
+	cmp -s bright /usr/local/bin/bright || cp -i bright /usr/local/bin/
 	chmod u+s bright
 	chmod a+x bright
-	mv -n bright.desktop "$HOME/.local/share/applications/"
+	cmp -s bright.desktop "${HOME}/.local/share/applications/bright.desktop" || cp -i bright.desktop "${HOME}/.local/share/applications/"

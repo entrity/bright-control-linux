@@ -58,13 +58,13 @@ class CP(Frame):
 
 		frame = Frame(imgFrame)
 		frame.pack(side=LEFT)
-		self.btn_and_lbl(frame, 'red + 500', IMG_RED_ADD, TOP, lambda : self.set_and_get(-500, RED|PLUS))
-		self.btn_and_lbl(frame, 'red - 500', IMG_RED_SUB, BOTTOM, lambda : self.set_and_get(500, RED|PLUS))
+		self.btn_and_lbl(frame, 'red - 100', IMG_RED_SUB, TOP, lambda : self.set_and_get(100, RED|PLUS))
+		self.btn_and_lbl(frame, 'red + 100', IMG_RED_ADD, BOTTOM, lambda : self.set_and_get(-100, RED|PLUS))
 
 		frame = Frame(imgFrame)
 		frame.pack(side=LEFT)
-		self.btn_and_lbl(frame, 'red x 2', IMG_RED_MUL, TOP, lambda : self.set_and_get(0.5, RED|MUL))
-		self.btn_and_lbl(frame, u'red \xf7 2', IMG_RED_DIV, BOTTOM, lambda : self.set_and_get(2, RED|MUL))
+		self.btn_and_lbl(frame, 'red - 1000', IMG_RED_DIV, TOP, lambda : self.set_and_get(1000, RED|PLUS))
+		self.btn_and_lbl(frame, 'red + 1000', IMG_RED_MUL, BOTTOM, lambda : self.set_and_get(-1000, RED|PLUS))
 
 		frame = Frame(imgFrame)
 		frame.pack(side=LEFT)
