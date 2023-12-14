@@ -14,11 +14,11 @@
 #include <unistd.h>
 
 #define FILENAME "/sys/class/backlight/intel_backlight/brightness"
-#define BRIGHTMAX 150
 #define BRIGHTMIN 1
 
 FILE * out;
 
+char isBatch = 0; // Just print numbers, no labels
 int newValue; // value to be set
 
 // Read current value from file
@@ -27,14 +27,52 @@ int readCurrentValue ();
 void update(int newValue);
 
 // Apply user input to current value arithmetically, return sum/difference
-int inferNewValueFromModifier (char * argv[], int multiplier);
-
-
-int inferNewValueFromModifier (char * argv[], int multiplier)
+int computeNewValue (int prevValue, char operator, float operand)
 {
-	int modifier;
-	sscanf(&argv[1][1], "%d", &modifier);
-	return (modifier * multiplier) + readCurrentValue();
+	if (operand >= 0) {
+		switch(operator) {
+		case '+':
+			return prevValue + operand;
+		case 'x':
+		case '*':
+			return prevValue * operand;
+		case '-':
+			return prevValue - operand;
+		case '/':
+			return prevValue / operand;
+		}
+	} else {
+		switch(operator) {
+		case '+':
+		case 'x':
+		case '*':
+			return prevValue * 2;
+		case '-':
+		case '/':
+			return prevValue / 2;
+		}
+	}
+}
+
+int processArgs (int i, int argc, char * argv[])
+{
+	char operator[2]; // 1 for char, 1 for '\0'
+	float operand;
+	int curValue = readCurrentValue();
+	for (; i < argc; i++) {
+		if (0 == strcmp("-b", argv[i]))
+			isBatch = 1;
+		else if (2 == sscanf(argv[i], "%1[-+/x*]%f", &operator[0], &operand)) {
+			curValue = computeNewValue(curValue, operator[0], operand);
+		}
+		else if (1 == sscanf(argv[i], "%1[-+/x*]", &operator[0])) {
+			curValue = computeNewValue(curValue, operator[0], -1);
+		}
+		else if (1 == sscanf(argv[i], "%f", &operand)) {
+			curValue = operand;
+		}
+	}
+	return curValue;
 }
 
 // Main
@@ -45,37 +83,16 @@ int main (int argc, char * argv[])
 		printf("Current brightness: %d\n", readCurrentValue());
 	}
 	else {
-		char opt;
-		char isBatch = 0;
-		int newValue = -1;
-		int curValue = readCurrentValue();
-		opterr = 0;
-		while ((opt = getopt(argc, argv, "b")) != -1) {
-			switch(opt) {
-			case 'b': isBatch = 1; break;
-			case '?':
-				if (sscanf(argv[optind-1], "%d", &newValue))
-					newValue += curValue;
-				break;
-			}
-		}
-		for (int i = optind; i < argc; i++) {
-			if (strlen(argv[i]) == 1) {
-				if (argv[i][0] == '+')
-					newValue = curValue * 2;
-				else if (argv[i][0] == '-')
-					newValue = curValue / 2;
-			}
-			if (sscanf(argv[i], "%d", &newValue))
-				if (argv[i][0] == '+')
-					newValue += curValue;
-		}
-		if (newValue >= 0)
+		// Apply non option args as arithemtic operations on the brightness value, set new value
+		if (argc > 0) {
+			int newValue = processArgs(0, argc, argv);
 			update(newValue);
+		}
+		// Print current value (possibly updated)
 		if (isBatch)
 			printf("%d\n", readCurrentValue());
 		else
-			printf("Brightness\t%d\n", readCurrentValue());
+			printf("\033[33mBrightness\t%d\033[0m\n", readCurrentValue());
 	}
 	return 0;
 }

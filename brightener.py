@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Provides a GUI of buttons for quick, repeated clicks to adjust monitor brightness.
 
 from Tkinter import *
